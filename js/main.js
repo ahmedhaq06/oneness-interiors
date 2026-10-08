@@ -16,27 +16,41 @@ document.addEventListener('DOMContentLoaded', () => {
 function initMobileNav() {
   const toggleBtn = document.getElementById('mobileToggle');
   const mainNav = document.getElementById('mainNav');
-  const navLinks = mainNav ? mainNav.querySelectorAll('.nav-link') : [];
+  const navLinks = mainNav ? mainNav.querySelectorAll('.nav-link, .btn') : [];
 
   if (!toggleBtn || !mainNav) return;
 
+  const closeMenu = () => {
+    mainNav.classList.remove('is-open');
+    toggleBtn.classList.remove('is-active');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+
+  const openMenu = () => {
+    mainNav.classList.add('is-open');
+    toggleBtn.classList.add('is-active');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+
   toggleBtn.addEventListener('click', () => {
-    const isOpen = mainNav.classList.toggle('is-open');
-    toggleBtn.setAttribute('aria-expanded', String(isOpen));
+    const isOpen = mainNav.classList.contains('is-open');
+    if (isOpen) {
+      closeMenu();
+    } else {
+      openMenu();
+    }
   });
 
   navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      mainNav.classList.remove('is-open');
-      toggleBtn.setAttribute('aria-expanded', 'false');
-    });
+    link.addEventListener('click', closeMenu);
   });
 
   // Close when clicking outside
   document.addEventListener('click', (e) => {
-    if (!mainNav.contains(e.target) && !toggleBtn.contains(e.target)) {
-      mainNav.classList.remove('is-open');
-      toggleBtn.setAttribute('aria-expanded', 'false');
+    if (!mainNav.contains(e.target) && !toggleBtn.contains(e.target) && mainNav.classList.contains('is-open')) {
+      closeMenu();
     }
   });
 }
@@ -168,6 +182,24 @@ function initLightbox() {
       const desc = trigger.getAttribute('data-desc');
       if (imgSrc) {
         openModal(imgSrc, title, desc);
+      }
+    });
+  });
+
+  // Allow clicking/tapping the project media image directly
+  const projectMedias = document.querySelectorAll('.project-media');
+  projectMedias.forEach(media => {
+    media.addEventListener('click', (e) => {
+      // Avoid double trigger if clicking the button itself
+      if (e.target.closest('.lightbox-trigger')) return;
+      const trigger = media.querySelector('.lightbox-trigger');
+      if (trigger) {
+        const imgSrc = trigger.getAttribute('data-img');
+        const title = trigger.getAttribute('data-title');
+        const desc = trigger.getAttribute('data-desc');
+        if (imgSrc) {
+          openModal(imgSrc, title, desc);
+        }
       }
     });
   });
